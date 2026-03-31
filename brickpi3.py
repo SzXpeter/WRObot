@@ -295,7 +295,6 @@ class BrickPi3(object):
                 manufacturer = self.get_manufacturer()
                 board = self.get_board()
                 vfw = self.get_version_firmware()
-                
             except IOError:
                 raise IOError("No SPI response")
             if manufacturer != "Dexter Industries" or board != "BrickPi3":
@@ -767,7 +766,7 @@ class BrickPi3(object):
                                 results[r] = results[r] - 0x10000
                     return results
                 else:
-                    raise SensorError("get_sensor error: Invalid sensor data: " + str(reply[5]))
+                    raise SensorError("get_sensor error: Invalid sensor data")
                     return
             else:
                 raise IOError("get_sensor error: No SPI response")

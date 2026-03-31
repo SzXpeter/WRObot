@@ -9,17 +9,21 @@ import brickpi3
 class Task:
     def __init__(self, robot: WroRobot):
         self.robot = robot
-        self.left_servo = 18
-        self.right_servo = 17
-        self.lift_motor_port = robot.BP.PORT_A
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.left_servo, GPIO.OUT)
-        GPIO.setup(self.right_servo, GPIO.OUT)
+        self.left_servo = 23
+        self.right_servo = 22
+        self.lift_motor_port = robot.PORT_A
+        # GPIO.setmode(GPIO.BCM)
+        # GPIO.setup(self.left_servo, GPIO.OUT)
+        # GPIO.setup(self.right_servo, GPIO.OUT)
+        self.robot.reset_motor_encoder(self.lift_motor_port)
 
-    def lift(self, degrees=720, speed=800):
-        self.robot.BP.set_motor_limits(self.lift_motor_port, 100, speed)
-        self.robot.BP.set_motor_position_relative(self.lift_motor_port, degrees)
+    def __del__(self):
+        GPIO.cleanup()
+        self.robot.reset_all()
 
+    def lift(self, degrees=270, speed=800):
+        self.robot.set_motor_limits(self.lift_motor_port, 100, speed)
+        self.robot.set_motor_position(self.lift_motor_port, degrees)
     
     def set_grabber(self, angle):
         if angle < 0:
@@ -38,7 +42,7 @@ class Task:
         left_pwm.ChangeDutyCycle(cycle)
         right_pwm.ChangeDutyCycle(cycle)
 
-        time.sleep(.25)
+        time.sleep(.3)
         GPIO.output(self.left_servo, False)
         GPIO.output(self.right_servo, False)
         left_pwm.ChangeDutyCycle(cycle)
@@ -49,18 +53,23 @@ class Task:
 
 
     def gyro_test(self):
-        try: 
+        try:
             while True:
                 try:
                     if self.robot.button_pressed():
-                        self.robot.gyro_sensor.reset()
+                        break
                     print(self.robot.gyro_sensor.angle)
                 except brickpi3.SensorError as error:
                     print(error)
-                time.sleep(.2)
+                # time.sleep(.2)
         except KeyboardInterrupt:
             pass
-        self.robot.BP.reset_all()
+        self.robot.reset_all()
         time.sleep(1)
         
+    def gyro_forw_test(self):
+        self.robot.forward_cm_with_gyro(300, 10, 0)
     
+    def turn_gyro_test(self):
+        self.robot.turn_with_gyro(angle=90, speed=200)
+        print(self.robot.gyro_sensor.angle)

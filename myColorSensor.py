@@ -55,7 +55,6 @@ class my_color_sensor:
 
     #     print('White: {0}, Black: {1}'.format(white_value, black_value), file=sys.stderr )
 
-
 class my_gyro_sensor:
     def __init__(self, BP:BrickPi3, port) -> None:
         self.BP = BP
@@ -81,15 +80,20 @@ class my_gyro_sensor:
 
     @property
     def angle(self):
-        # if time.time() - self.last_time > 0.05:
-        #     self.last_time = time.time()
-        # return self.last_angle 
+        if time.time_ns() - self.last_time < 1e6:
+            print(time.time_ns() - self.last_time)
+            return self.last_angle
+        
         try:
-            self.last_angle = self.angle_raw + self.correction + self.offset 
+            self.last_angle = self.angle_raw + self.correction + self.offset
+            print(self.last_angle)
         except SensorError as se:
             print("sensorerros: ", se)
         except Exception as e:
             print(e)
+        self.last_time = time.time_ns()
         return self.last_angle
+        #  return self.angle_raw + self.correction + self.offset
+    
 
 
