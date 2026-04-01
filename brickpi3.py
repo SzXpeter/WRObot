@@ -881,7 +881,7 @@ class BrickPi3(object):
             if port & (1 << p):
                 self.set_motor_position((1 << p), (self.get_motor_encoder(1 << p) + degrees))
 
-    def set_motor_position_kp(self, port, kp = 25):
+    def set_motor_position_kp(self, port, kp = 50):
         """
         Set the motor target position KP constant
 
@@ -896,7 +896,7 @@ class BrickPi3(object):
         outArray = [self.SPI_Address, self.BPSPI_MESSAGE_TYPE.SET_MOTOR_POSITION_KP, int(port), int(kp)]
         self.spi_transfer_array(outArray)
 
-    def set_motor_position_kd(self, port, kd = 70):
+    def set_motor_position_kd(self, port, kd = 100):
         """
         Set the motor target position KD constant
 
