@@ -20,7 +20,6 @@ class WroRobot(BrickPi3):
         self.start_log()
 
     def __del__(self):
-        self.set_led(0)
         self.reset_all()
     
     def wait_for_button_press(self):
@@ -55,22 +54,7 @@ class WroRobot(BrickPi3):
         print(self.get_voltage_battery())
         self.wait_for_button_press()
 
-    def forward_cm(self, speed, distance, stop=True):
-        degrees = distance * (360 / 17.6)
-        self.forward_angle(speed, degrees, stop)
-
-    def forward_angle(self, speed, degrees, wait=True):
-        
-        self.set_motor_limits(self.left_motor_port, 100, speed)
-        self.set_motor_limits(self.right_motor_port, 100, speed)
-        self.set_motor_position_relative(self.left_motor_port, -degrees)
-        self.set_motor_position_relative(self.right_motor_port, -degrees)
-        time.sleep(0.5)
-        if wait:
-            while self.get_motor_status(self.left_motor_port)[3] != 0:
-                time.sleep(0.01)
-
-    def align_to_black(self, speed, black_threshold = None):
+    def align_to_black(self, speed=150, black_threshold = None):
         self.set_motor_dps(self.left_motor_port, -speed)
         self.set_motor_dps(self.right_motor_port, -speed)
         is_right_running = 3
@@ -88,7 +72,7 @@ class WroRobot(BrickPi3):
         print(self.left_color_sensor.get_reflection())
         print(self.right_color_sensor.get_reflection())
 
-    def align_to_white(self, speed=200, white_threshold = None):
+    def align_to_white(self, speed=150, white_threshold = None):
         self.set_motor_dps(self.left_motor_port, -speed)
         self.set_motor_dps(self.right_motor_port, -speed)
         is_right_running = 3
@@ -115,11 +99,11 @@ class WroRobot(BrickPi3):
         self.set_motor_dps(self.left_motor_port, 0)
         self.set_motor_dps(self.right_motor_port, 0) 
 
-    def turn_one_wheel_gyro(self, port, angle, speed=650, slow=True):
+    def turn_one_wheel_gyro(self, port, angle, speed=550, slow=True):
         if port is self.left_motor_port: self.turn_one_left_gyro(angle, speed, slow)
         if port is self.right_motor_port: self.turn_one_right_gyro(angle, speed, slow)
 
-    def turn_one_left_gyro(self, angle, speed = 650, slow = True):
+    def turn_one_left_gyro(self, angle, speed = 550, slow = True):
         print("Turning with left_motor")
         start_angle = self.gyro_sensor.angle
         if (start_angle > angle):
@@ -143,7 +127,7 @@ class WroRobot(BrickPi3):
                 print("Current angle: ", angle_now, angle, speed)
         self.set_motor_dps(self.left_motor_port, 0)
 
-    def turn_one_right_gyro(self, angle, speed = 650, slow = True):
+    def turn_one_right_gyro(self, angle, speed = 550, slow = True):
         self.log("Turning with right_motor")
         start_angle = self.gyro_sensor.angle
         if (start_angle > angle):
@@ -167,7 +151,7 @@ class WroRobot(BrickPi3):
                 print(f"Current angle: {angle_now}, {angle}, {speed}")
         self.set_motor_dps(self.right_motor_port, 0)
 
-    def turn_with_gyro(self, angle, speed = 650, slow = True):
+    def turn_with_gyro(self, angle, speed = 550, slow = True):
         start_angle = self.gyro_sensor.angle
         if (start_angle > angle):
             self.set_motor_dps(self.left_motor_port, -speed)
@@ -202,7 +186,7 @@ class WroRobot(BrickPi3):
         wf = lambda robot : not sensor.is_white_reflection()
         self.forward_with_gyro(speed, angle, wf, True)            
    
-    def forward_cm_with_gyro(self, speed, distance, angle, stop = None, is_PID = False):
+    def forward_cm_with_gyro(self, distance, angle, speed=550, stop = None, is_PID = False):
         print(speed, distance)   
         degrees = distance * (360 / 17.6) * -1
         self.forward_angle_wit_gyro(speed, degrees, angle, stop, is_PID)
@@ -235,7 +219,7 @@ class WroRobot(BrickPi3):
             #print("gyro: {0}, left speed: {1}, right speed: {2}".format(self.gyro_sensor.angle, left_speed, right_speed), file=sys.stderr)
             if is_PID: 
                 my_PID = PID(25, 10, 5, angle, time_step)
-                diff_speed = my_PID.compute(self.gyro_sensor.angle)
+                diff_speed = my_PID.compute(now_gyro_angle)
             else:
                 diff_speed = (angle - (now_gyro_angle + self.gyro_correction)) *25
             

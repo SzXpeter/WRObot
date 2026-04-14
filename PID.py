@@ -17,6 +17,6 @@ class PID:
 		self.integral_error += self.error * self.time_step
 		self.derivative_error = self.error - self.error_last
 		self.error_last = self.error
-		self.output = self.kp*self.error + self.ki*self.integral_error + self.kd*self.derivative_error
+		self.output = -(self.kp*self.error + self.ki*self.integral_error + self.kd*self.derivative_error)
 		print("PID: ", self.output, ", kp: ", self.kp*self.error, ", ki: ", self.ki*self.integral_error, ", kd: ", self.kd*self.derivative_error)
 		return self.output 

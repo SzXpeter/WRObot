@@ -50,7 +50,6 @@ class Task:
             GPIO.output(self.left_servo, False)
             GPIO.output(self.right_servo, False)
 
-
     def gyro_test(self):
         try:
             while True:
@@ -88,57 +87,45 @@ class Task:
 
     def do_glettelo(self): # laposkenő
         self.set_grabber(0)
-        self.robot.forward_cm_with_gyro(speed=500, distance=25, angle=-15)
+        self.robot.forward_cm_with_gyro(distance=25, angle=-15)
 
-        self.robot.forward_cm_with_gyro(speed=500, distance=40, angle=0)
+        self.robot.forward_cm_with_gyro(distance=40, angle=0)
         self.set_grabber(60)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-26, angle=0)
+        self.robot.forward_cm_with_gyro(distance=-26, angle=0)
         self.set_grabber(0)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-10, angle=0)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-15, angle=-30)
+        self.robot.forward_cm_with_gyro(distance=-10, angle=0)
+
+        # 1. eszköz letéve
+
+        self.robot.forward_cm_with_gyro(distance=-15, angle=-30)
         self.set_grabber(60)
         self.robot.turn_with_gyro(0)
-        self.robot.forward_cm_with_gyro(speed=500, distance=72, angle=0)
+        self.robot.forward_cm_with_gyro(distance=72, angle=0)
         self.lift()
-        self.robot.forward_cm_with_gyro(speed=500, distance=22, angle=-35)
-        self.robot.forward_cm_with_gyro(speed=500, distance=8, angle=0)
+        self.robot.forward_cm_with_gyro(distance=22, angle=-35)
+        self.robot.forward_cm_with_gyro(distance=8, angle=0)
         self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, angle = 45, slow=False)
         self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle = 0)
         self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(speed=500, distance=42, angle=0)
+        self.robot.forward_cm_with_gyro(distance=42, angle=0)
 
         self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, 180, slow=False)
         time.sleep(0.2)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-15, angle=210)
+
+        # 2. eszköz letéve
+
+        self.robot.forward_cm_with_gyro(distance=-15, angle=210)
         self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle=270)
-        self.robot.forward_cm_with_gyro(speed=500, distance=36, angle=270)
+        self.robot.forward_cm_with_gyro(distance=36, angle=270)
         self.robot.wait_for_button_press()
-        self.robot.align_to_black(speed=100)
-        self.robot.turn_with_gyro(angle=180, speed=500)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-8, angle=180)
+        self.robot.align_to_black()
+        self.robot.turn_with_gyro(angle=180)
+        self.robot.forward_cm_with_gyro(distance=-8, angle=180)
+
         self.robot.wait_for_button_press()
+
         self.robot.align_to_black(speed=-100)
-        self.robot.forward_cm_with_gyro(speed=500, distance=-10, angle=180)
-        self.robot.turn_with_gyro(speed=500, angle=90)
-        self.robot.forward_cm_with_gyro(speed=500, distance=15, angle=90)
-        self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, angle=180, speed=500)
-
-    def test1(self):
-        self.set_grabber(0)
-        self.robot.forward_cm_with_gyro(600, 80, 0, is_PID=False)
-        self.robot.forward_cm_with_gyro(600, -5, 0, is_PID=False)
-        self.robot.wait_for_button_press()
-        self.set_grabber(60)
-        self.robot.wait_for_button_press()
-        self.lift(degrees=200)
-
-    def grab_test_1(self):
-        self.set_grabber(15)
-        self.robot.wait_for_button_press()
-        self.set_grabber(60, hold=True)
-        # self.robot.wait_for_button_press()
-        # self.set_grabber(30)
-        
-        self.robot.wait_for_button_press()
-        self.lift(degrees=200)
-        
+        self.robot.forward_cm_with_gyro(distance=-10, angle=180)
+        self.robot.turn_with_gyro(angle=90)
+        self.robot.forward_cm_with_gyro(distance=15, angle=90)
+        self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, angle=180)

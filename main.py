@@ -19,32 +19,21 @@ if leallit:
     sys.exit()
 
 try:
-    print(time.time())
+    now_time = time.time()
     robot.starting()
-    # sleep(0.5)
-    # robot.starting()
     sleep(1)
     task.gyro_test()
     task.do_glettelo()
-    # task.grab_test_1()
-    # task.gyro()
+
+    robot.log(f"Task completed in {time.time() - now_time} seconds")
 
 
 
 except KeyboardInterrupt as e:
     print("Keyboard: " + str(e))
-    robot.set_led(0)
     robot.reset_all()
-# except Exception as e:
-#     print(e)
-#     robot.reset_all()
 
+except Exception as e:
+    print(e)
+    robot.reset_all()
 
-
-# task.lift()
-# task.set_grabber(0)
-# sleep(.5)
-# task.lift(0)
-# task.set_grabber(60)
-
-sleep(1)
