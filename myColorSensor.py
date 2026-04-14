@@ -3,11 +3,10 @@ from brickpi3 import *
 import sys, time
 
 class my_color_sensor:
-
     def __init__(self, port, BP: BrickPi3):
         self.port = port
         self.BP = BP
-        BP.set_sensor_type(port, BrickPi3.SensorType.EV3_COLOR_REFLECTED)
+        self.BP.set_sensor_type(port, BrickPi3.SENSOR_TYPE.EV3_COLOR_REFLECTED)
         try:
             with open('color_values_{0}.txt'.format(self.port), 'r') as f:
                 self.white_value = int(f.readline())
@@ -40,20 +39,24 @@ class my_color_sensor:
     def is_not_white_reflection(self, threshold = None):
         return not self.is_white_reflection(threshold)
 
-    # def calibrate(self, console = None):
-    #     white_value = self.value()
+    def calibrate(self, button_pressed):
+        print(self.port, "white")
+        while not button_pressed():
+            pass
+        white_value = self.BP.get_sensor(self.port)
+        time.sleep(1)
+        # self.display.draw.text((10,10), 'FEKETE', font=fonts.load('luBS24'))
+        # Sound().speak('Black')
+        print(self.port, "white")
+        while not button_pressed():
+            pass
+        black_value = self.BP.get_sensor(self.port)
 
-    #     self.display.draw.text((10,10), 'FEKETE', font=fonts.load('luBS24'))
-    #     Sound().speak('Black')
-    #     while not button.enter:
-    #         pass
-    #     black_value = self.value()
+        with open('color_values_{0}.txt'.format(self.port), 'w') as f:
+            f.write('{0}\n'.format(white_value))
+            f.write('{0}\n'.format(black_value))
 
-    #     with open('color_values_{0}.txt'.format(self.port), 'w') as f:
-    #         f.write('{0}\n'.format(white_value))
-    #         f.write('{0}\n'.format(black_value))
-
-    #     print('White: {0}, Black: {1}'.format(white_value, black_value), file=sys.stderr )
+        print('White: {0}, Black: {1}'.format(white_value, black_value), file=sys.stderr )
 
 class my_gyro_sensor:
     def __init__(self, BP:BrickPi3, port) -> None:
@@ -81,18 +84,18 @@ class my_gyro_sensor:
     @property
     def angle(self):
         if time.time_ns() - self.last_time < 1e6:
-            print(time.time_ns() - self.last_time)
-            return self.last_angle
+            # print(time.time_ns() - self.last_time)
+            return -self.last_angle
         
         try:
             self.last_angle = self.angle_raw + self.correction + self.offset
-            print(self.last_angle)
+            # print(self.last_angle)
         except SensorError as se:
             print("sensorerros: ", se)
         except Exception as e:
             print(e)
         self.last_time = time.time_ns()
-        return self.last_angle
+        return -self.last_angle
         #  return self.angle_raw + self.correction + self.offset
     
 

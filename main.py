@@ -10,6 +10,9 @@ task = Task(robot)
 leallit = False
 # leallit = True
 
+# robot.calibrate()
+# sys.exit()
+
 if leallit: 
     print("ÖSSZES MOTOR LEÁLL!!!!!ÖSSZES MOTOR LEÁLL!!!!!ÖSSZES MOTOR LEÁLL!!!!!ÖSSZES MOTOR LEÁLL!!!!!ÖSSZES MOTOR LEÁLL!!!!!")
     robot.reset_all()
@@ -18,23 +21,23 @@ if leallit:
 try:
     print(time.time())
     robot.starting()
-    sleep(0.5)
-    robot.starting()
+    # sleep(0.5)
+    # robot.starting()
     sleep(1)
     task.gyro_test()
-    task.turn_gyro_test()
-    # n = 1000
-    # while n: 
-    #     print(robot.gyro_sensor.angle)
-    #     n -= 1
-    #     time.sleep(0.01)
+    task.do_glettelo()
+    # task.grab_test_1()
+    # task.gyro()
+
+
 
 except KeyboardInterrupt as e:
     print("Keyboard: " + str(e))
+    robot.set_led(0)
     robot.reset_all()
-except Exception as e:
-    print(e)
-    robot.reset_all()
+# except Exception as e:
+#     print(e)
+#     robot.reset_all()
 
 
 
