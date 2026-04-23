@@ -42,21 +42,27 @@ try:
     # robot.starting()
 
     # sleep(0.5)
-    robot.starting()
+    robot.starting(command=task.lift)
     task.gyro_test()
     now_time = time.time()
     task.do_glettelo()
     task.align_to_lines()
     task.do_kanal()
     task.cubes1()
+    robot.log(f"cubes1 {time.time() - now_time} seconds")
+    task.cubes2()
     robot.log(f"Task completed in {time.time() - now_time} seconds")
+    # task.cubes3()
+    robot.log(f"Task+ completed in {time.time() - now_time} seconds")
 
 
 except KeyboardInterrupt as e:
-    print("Keyboard: " + str(e))
+    print("Keyboard" + str(e))
     robot.reset_all()
 
 except Exception as e:
     print(e)
+    task.set_grabber(0)
+    task.set_grabber(80)
     robot.reset_all()
- 
+

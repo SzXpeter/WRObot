@@ -1,0 +1,4 @@
+sudo systemctl enable wrobot.service
+python Read_Info.py 
+sudo rfkill block bluetooth
+vcgencmd get_throttled

@@ -28,28 +28,28 @@ class Task:
         GPIO.cleanup()
         self.robot.reset_all()
 
-    def lift(self, degrees=0, speed=300):
+    def lift(self, degrees=20, speed=300):
         self.robot.reset_motor_encoder(self.lift_motor_port)
         self.robot.set_motor_limits(self.lift_motor_port, 100, speed)
         if degrees > 0:
             self.robot.set_motor_dps(self.lift_motor_port, speed)
 
-            while (degrees-self.robot.get_motor_encoder(self.lift_motor_port) > 5):
+            while (degrees-self.robot.get_motor_encoder(self.lift_motor_port) > 2):
                 # self.robot.set_motor_dps(self.lift_motor_port, speed)
-                time.sleep(0.02)
+                time.sleep(0.002)
                 # print(degrees, self.robot.get_motor_encoder(self.lift_motor_port))
         else:  
             self.robot.set_motor_dps(self.lift_motor_port, -speed)
 
-            while (degrees-self.robot.get_motor_encoder(self.lift_motor_port) <= -5):
+            while (degrees-self.robot.get_motor_encoder(self.lift_motor_port) <= -2):
                 # self.robot.set_motor_dps(self.lift_motor_port, -speed)
-                time.sleep(0.02)
+                time.sleep(0.002)
                 # print(degrees, self.robot.get_motor_encoder(self.lift_motor_port))
         self.robot.set_motor_dps(self.lift_motor_port, 0)    
     
     def set_grabber(self, angle, hold=False):
-        if angle < 0:
-            angle = 0
+        if angle < 10:
+            angle = 10
         elif angle > 80:
             angle = 80
   
@@ -60,7 +60,7 @@ class Task:
         self.left_pwm.ChangeDutyCycle(cycle)
         self.right_pwm.ChangeDutyCycle(cycle)
 
-        time.sleep(0.3)
+        time.sleep(0.2)
         if not hold:
             GPIO.output(self.left_servo, False)
             GPIO.output(self.right_servo, False)
@@ -101,106 +101,212 @@ class Task:
         self.robot.align_to_wall(time_to_go=3)
 
     def do_glettelo(self): # laposkenő
-        # self.lift(30)
         self.set_grabber(0)
-        self.robot.forward_cm_with_gyro(distance=25, angle=-15, stop=False)
+        self.lift(30)
+        self.robot.turn_with_gyro(angle=-12)
+        self.robot.forward_cm_with_gyro(distance=21.5, angle=-12, stop=False)
 
         self.robot.forward_cm_with_gyro(distance=40, angle=0)
         self.set_grabber(80)
-        self.robot.forward_cm_with_gyro(distance=-26, angle=0, stop=False)
+        self.robot.forward_cm_with_gyro(distance=-26, angle=0)
         self.set_grabber(0)
-        # self.robot.forward_cm_with_gyro(distance=-10, angle=0)
 
         # 1. eszköz letéve
 
-        self.robot.forward_cm_with_gyro(distance=-15, angle=-30)
+        self.robot.forward_cm_with_gyro(distance=-10, angle=-35)
         self.set_grabber(80)
-        self.robot.turn_with_gyro(0)
-        self.robot.forward_cm_with_gyro(distance=62, angle=0, stop=False)
+        self.robot.turn_with_gyro(angle=0)
+        self.robot.forward_cm_with_gyro(distance=55, angle=0)
         self.lift(degrees=200)
-        self.robot.forward_cm_with_gyro(distance=27.5, angle=-38, stop=False)
-        self.robot.forward_cm_with_gyro(distance=8, angle=0)
-        self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, angle = 53, slow=False, speed=500)
-        self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle = 0, speed=500)
+        self.robot.turn_with_gyro(angle=-40, speed=400)
+        self.robot.forward_cm_with_gyro(distance=14, angle=-40)
+        self.robot.turn_with_gyro(angle=0, speed=500)
+        self.robot.forward_cm_with_gyro(distance=23, angle=0, speed=450)
+        self.robot.turn_with_gyro(angle=30, speed=400)
+        self.robot.forward_cm_with_gyro(distance=23, speed=400, angle=30)
+        self.robot.turn_with_gyro(angle=0, speed=400)
         # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=44, angle=0)
+        self.robot.forward_cm_with_gyro(distance=37.5, angle=0)
 
-        self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, 200, slow=False)
-        time.sleep(0.2)
+        self.robot.turn_one_wheel_gyro(self.robot.right_motor_port, 180, 720)
+        # time.sleep(0.2)
 
         # 2. eszköz letéve
 
-        self.robot.forward_cm_with_gyro(distance=-17, angle=210)
-        self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle=270)
-        self.robot.forward_cm_with_gyro(distance=38, angle=270, stop=False)
+        self.robot.forward_cm_with_gyro(distance=-22.5, angle=180)
+        self.robot.turn_with_gyro(angle=270, speed=400)
+        self.robot.forward_cm_with_gyro(distance=25, angle=270)
         # self.robot.wait_for_button_press()
-
-
 
     def align_to_lines(self):
         self.robot.align_to_black()
+        # self.robot.wait_for_button_press()
         # self.robot.gyro_sensor.reset_with_angle(270)
-        self.robot.turn_with_gyro(angle=180)
-        self.robot.turn_with_gyro(angle=180)
-        self.robot.forward_cm_with_gyro(distance=-5, angle=180, stop=False)
+        self.robot.turn_with_gyro(angle=180, speed=400)
+        time.sleep(0.1)
+        self.robot.forward_cm_with_gyro(distance=-9, angle=180)
 
         # self.robot.wait_for_button_press()
 
         self.robot.align_to_black(speed=-100)
+        self.robot.gyro_sensor.reset_with_angle(180)
+        self.set_grabber(0)
 
         # self.robot.gyro_sensor.reset_with_angle(180)
 
     def do_kanal(self):
         # self.robot.align_to_black(speed=-100)
         # self.robot.gyro_sensor.reset_with_angle(180)
-        self.robot.forward_cm_with_gyro(distance=10, angle=200, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=50, angle=177, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=20, angle=160, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=45, angle=177, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=35, angle=170, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=20, angle=180, stop=False)
-        # self.robot.wait_for_button_press()
-        self.robot.forward_cm_with_gyro(distance=15, angle=200)
-        time.sleep(0.3)
-        self.robot.forward_cm_with_gyro(distance=-18.5, angle=185, speed=500)
+        self.robot.forward_cm_with_gyro(distance=10, angle=200, speed=550, stop=False)
+        self.robot.forward_cm_with_gyro(distance=50, angle=178, speed=550)
+        self.robot.forward_cm_with_gyro(distance=20, angle=160, speed=550, stop=False)
+        self.robot.forward_cm_with_gyro(distance=40, angle=178, speed=550, stop=False)
+        self.robot.forward_cm_with_gyro(distance=27.5, angle=170, speed=550, stop=False)
+        self.robot.forward_cm_with_gyro(distance=30, angle=180, speed=550, stop=False)
+        self.robot.forward_cm_with_gyro(distance=15, angle=210, speed=550)
+        time.sleep(0.15)
+        self.robot.forward_cm_with_gyro(distance=-16, angle=180, speed=500)
 
         self.robot.turn_with_gyro(angle=90, speed=500)
-        # self.robot.wait_for_button_press()
-        time.sleep(0.2)
-
+        self.robot.forward_cm_with_gyro(angle=90, distance=6, stop=False)
 
     def cubes1(self):
         self.robot.align_to_black(speed=100)
-        self.robot.forward_cm_with_gyro(distance=15, angle=90)
+        self.robot.forward_cm_with_gyro(distance=15, angle=90, stop=False)
         # self.robot.wait_for_button_press()
-        self.robot.align_to_black()
+        self.robot.forward_with_gyro_to_black(speed=200, angle=90, sensor=self.robot.left_color_sensor)
         # self.robot.wait_for_button_press()
         self.robot.turn_with_gyro(angle=184)
+        # self.robot.align_to_white()
 
-        self.robot.forward_cm_with_gyro(distance=3, angle=182, stop=False, speed=200)
-        self.set_grabber(0)
-        self.lift(degrees=-195)
-        time.sleep(0.2)
+        self.lift(degrees=-220)
+        self.robot.forward_cm_with_gyro(distance=8, angle=182, speed=200, stop=False)
+        # time.sleep(0.2)
         self.robot.align_to_black()
-        time.sleep(0.5)
-        # self.robot.forward_cm_with_gyro(distance=1.5, angle=180, speed=300)
+        time.sleep(0.2)
+        self.robot.forward_cm_with_gyro(distance=-1, angle=180, speed=300)
         self.set_grabber(60, hold=True)
-        self.robot.forward_cm_with_gyro(distance=2, angle=180, speed=300)
+        self.robot.forward_cm_with_gyro(distance=2, angle=180, speed=200)
         self.set_grabber(0, hold=True)
-        self.robot.forward_cm_with_gyro(distance=3.75, angle=180, speed=300)
+        self.robot.forward_cm_with_gyro(distance=3, angle=180, speed=200)
         self.set_grabber(60, hold=True)
+        self.lift(degrees=50)
 
         # self.robot.wait_for_button_press()
 
-        self.robot.forward_cm_with_gyro(distance=-3, angle=182, stop=False, speed=300)
+        self.robot.forward_cm_with_gyro(distance=-8, angle=182, stop=False, speed=300)
         self.robot.align_to_white(speed=-150)
         
         # self.robot.wait_for_button_press()
         self.robot.forward_cm_with_gyro(distance=-3, angle=181, stop=False, speed=300)
         self.robot.align_to_black(speed=-150)
+        self.robot.align_to_black(speed=-150)
 
+        self.robot.turn_with_gyro(angle=90)
+        self.robot.forward_cm_with_gyro(distance=-15, angle=90, stop=False)
+        self.robot.align_to_black(speed=-150)
+        self.robot.forward_cm_with_gyro(distance=-8.5, angle=90)
+        self.robot.turn_with_gyro(angle=-3)
+        self.robot.forward_cm_with_gyro(distance=60, angle=-3, stop=False)
+        self.robot.forward_with_gyro_to_black(speed=150, angle=0, sensor=self.robot.left_color_sensor)
+        self.robot.forward_cm_with_gyro(distance=-1, angle=0)
+        # self.robot.wait_for_button_press()
+        self.robot.turn_with_gyro(angle=92)
+        self.lift(degrees=50)
+        self.robot.forward_cm_with_gyro(distance=20, angle=92, stop=False)
+        self.robot.align_to_black()
+        self.robot.forward_cm_with_gyro(distance=17.5, angle=92)
+        self.set_grabber(0)
+        self.robot.forward_cm_with_gyro(distance=-5, angle=92)
+        self.robot.forward_cm_with_gyro(distance=5, angle=92)
+        # time.sleep(0.3)
+        # self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle=85)
+        # self.robot.turn_one_wheel_gyro(self.robot.left_motor_port, angle=90)
+        # self.robot.forward_cm_with_gyro(distance=-20, angle=)
+        # self.robot.wait_for_button_press()
+
+    def cubes2(self):
+        self.robot.forward_cm_with_gyro(distance=-22.5, angle=90, stop=False)
+        self.robot.align_to_black(speed=-150)
+        self.robot.forward_cm_with_gyro(distance=-3, angle=90)
+        self.robot.turn_with_gyro(angle=0)
+        self.robot.forward_cm_with_gyro(distance=-71, angle=0)
+        self.robot.turn_with_gyro(angle=-90)
+        self.robot.forward_cm_with_gyro(distance=-80, angle=-89, stop=False)
+        self.robot.align_to_wall(time_to_go=2, speed=200)
+        time.sleep(0.5)
+        self.robot.gyro_sensor.reset_with_angle(-90)
+
+
+        self.robot.forward_cm_with_gyro(distance=10, angle=-90, stop=False)
+        self.robot.align_to_black()
+        self.robot.forward_cm_with_gyro(distance=-1, angle=-90)
+        self.robot.turn_with_gyro(angle=-180)
+        # self.robot.align_to_white()
+
+        self.lift(degrees=-100)
+        self.robot.forward_cm_with_gyro(distance=6, angle=-180, speed=200, stop=False)
+        # time.sleep(0.2)
+        self.robot.align_to_black()
+        time.sleep(0.2)
+        self.set_grabber(60, hold=True)
+        self.robot.forward_cm_with_gyro(distance=1.5, angle=-180, speed=200)
+        self.set_grabber(0, hold=True)
+        self.robot.forward_cm_with_gyro(distance=2.5, angle=-180, speed=200)
+        self.set_grabber(60, hold=True)
+        self.lift(50)
+
+        self.robot.forward_cm_with_gyro(distance=-3, angle=-178, stop=False, speed=400)
+        self.robot.align_to_white(speed=-150)
+        
+        self.robot.forward_cm_with_gyro(distance=-25, angle=-180, stop=False, speed=400)
+        self.robot.turn_with_gyro(angle=-90)
+        self.robot.forward_cm_with_gyro(distance=20, angle=-90, stop=False, speed=400)
+        self.robot.align_to_black()
+        self.robot.turn_with_gyro(angle=0)
+        self.lift(degrees=150)
+        # self.robot.log("emelt")
+        self.robot.forward_cm_with_gyro(distance=20, angle=0, stop=False, speed=400)
+        self.robot.align_to_black()
+        self.robot.forward_cm_with_gyro(distance=30, angle=0, speed=300)
+        self.set_grabber(0)
+        self.robot.forward_cm_with_gyro(distance=-10, angle=0, speed=550)
+        self.robot.forward_cm_with_gyro(distance=12, angle=0, speed=60)
+        self.robot.forward_cm_with_gyro(distance=-10, angle=0, speed=550)
+    
+    def cubes3(self):
+        self.robot.forward_cm_with_gyro(distance=-20, angle=0, speed=350, stop=False)
+        self.robot.align_to_black(speed=-150)
+        self.robot.turn_with_gyro(angle=90)
+        self.robot.forward_with_gyro_to_black(speed=200, angle=90, sensor=self.robot.left_color_sensor)
+        self.robot.turn_with_gyro(angle=184)
+
+        self.lift(degrees=-200)
+        self.robot.forward_cm_with_gyro(distance=8, angle=182, speed=200, stop=False)
+        self.robot.align_to_black()
+        time.sleep(0.2)
+        self.robot.forward_cm_with_gyro(distance=-1, angle=180, speed=300)
+        self.set_grabber(60, hold=True)
+        self.robot.forward_cm_with_gyro(distance=2, angle=180, speed=200)
+        self.set_grabber(0, hold=True)
+        self.robot.forward_cm_with_gyro(distance=3, angle=180, speed=200)
+        self.set_grabber(60, hold=True)
+        self.lift(degrees=50)
+
+
+        self.robot.forward_cm_with_gyro(distance=-3, angle=182, stop=False, speed=400)
+        self.robot.align_to_white(speed=-150)
+        
+        self.robot.forward_cm_with_gyro(distance=-3, angle=181, stop=False, speed=400)
+        self.robot.align_to_black(speed=-150)
+        self.robot.align_to_black(speed=-150)
+        self.robot.forward_cm_with_gyro(distance=-3, angle=180, speed=400)
+        self.robot.turn_with_gyro(angle=270)
+        self.robot.forward_cm_with_gyro(distance=-2, angle=270, speed=400, stop=False)
+        self.robot.align_to_black()
+        self.robot.turn_with_gyro(angle=360)
+        self.lift(degrees=150)
+        self.robot.forward_cm_with_gyro(distance=20, angle=360, stop=False, speed=400)
+        self.robot.align_to_black()
+        self.robot.forward_cm_with_gyro(distance=30, angle=360, speed=300)
+        self.set_grabber(0)

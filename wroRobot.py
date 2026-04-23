@@ -19,6 +19,8 @@ class WroRobot(BrickPi3):
         self.left_color_sensor = my_color_sensor(self.PORT_3, BP=self)
         self.right_color_sensor = my_color_sensor(self.PORT_2, BP=self)
         self.start_log()
+        self.set_motor_limits(self.left_motor_port, 70, 600)
+        self.set_motor_limits(self.right_motor_port, 70, 600)
 
     def __del__(self):
         self.reset_all()
@@ -34,38 +36,45 @@ class WroRobot(BrickPi3):
     def button_pressed(self):
         return self.get_sensor(self.touch_sensor_port)
 
-    def starting(self):
+    def starting(self, command):
         while True:
             try:
                 time.sleep(.02)
-                print(self.gyro_sensor.angle)
                 self.gyro_sensor.reset()
+                # print(self.gyro_sensor.angle)
             except SensorError as se:
-                print(se)
+                self.log(se)
             except Exception as e:
-                print("Nem Sensorhiba:", e)
+                self.log("Nem Sensorhiba:", e)
             else:
                 break
             finally:
                 time.sleep(0.5)
 
-        print("beep beep")
-        self.set_led(100)
         
         self.log(f"aku: {self.get_voltage_battery()}")
+        print("beep beep")
+        self.set_led(100)
         self.wait_for_button_press()
 
-    def align_to_black(self, speed=150, black_threshold = None):
+    def align_to_black(self, speed=200, black_threshold = None):
         self.set_motor_dps(self.left_motor_port, -speed)
         self.set_motor_dps(self.right_motor_port, -speed)
-        is_right_running = 3
+        is_right_running = 3 
         is_left_running = 3
         while (is_right_running or is_left_running):
             if (is_left_running and self.left_color_sensor.is_black_reflection(black_threshold)):
                 is_left_running -= 1
+            elif is_left_running: 
+                is_left_running = 3
+
 
             if (is_right_running and self.right_color_sensor.is_black_reflection(black_threshold)):
                 is_right_running -= 1
+            elif is_right_running: 
+                is_right_running = 3
+
+
 
             if (not is_left_running): self.set_motor_dps(self.left_motor_port, 0)
             if (not is_right_running): self.set_motor_dps(self.right_motor_port, 0)
@@ -79,11 +88,14 @@ class WroRobot(BrickPi3):
         is_left_running = 3
         while (is_right_running or is_left_running):
             if (is_left_running and self.left_color_sensor.is_white_reflection(white_threshold)):
-                self.set_motor_dps(self.left_motor_port, 0)
                 is_left_running -= 1
+            elif is_left_running: 
+                is_left_running = 3
 
             if (is_right_running and self.right_color_sensor.is_white_reflection(white_threshold)):
                 is_right_running -= 1
+            elif is_right_running: 
+                is_right_running = 3
 
             if (not is_left_running): self.set_motor_dps(self.left_motor_port, 0)
             if (not is_right_running): self.set_motor_dps(self.right_motor_port, 0)
@@ -110,48 +122,46 @@ class WroRobot(BrickPi3):
             self.set_motor_dps(self.left_motor_port, -speed)
             angle_now = self.gyro_sensor.angle
             while (angle_now > angle):
-                if (slow and abs(angle - angle_now) < 15):
-                    self.set_motor_dps(self.left_motor_port, -speed/5)
+                if (slow and abs(angle - angle_now) < 10):
+                    self.set_motor_dps(self.left_motor_port, -speed/10)
                     slow = False
                 angle_now = self.gyro_sensor.angle
         else: 
             self.set_motor_dps(self.left_motor_port, speed)
             angle_now = self.gyro_sensor.angle
             while (angle_now < angle): 
-                if (slow and abs(angle_now - angle) < 15):
+                if (slow and abs(angle_now - angle) < 10):
                     # self.log(f"slow {angle_now} {angle}")
-                    self.set_motor_dps(self.left_motor_port, speed/5)
+                    self.set_motor_dps(self.left_motor_port, speed/10)
                     slow = False
                 angle_now = self.gyro_sensor.angle
                 # print("Current angle: ", angle_now, angle, speed)
         self.set_motor_dps(self.left_motor_port, 0)
 
     def turn_one_right_gyro(self, angle, speed, slow):
-        self.log("Turning with right_motor")
         start_angle = self.gyro_sensor.angle
         if (start_angle > angle):
             self.set_motor_dps(self.right_motor_port, speed)
             angle_now = self.gyro_sensor.angle
             while (angle_now > angle):
-                if (slow and abs(angle - angle_now) < 15):
-                    self.set_motor_dps(self.right_motor_port, speed/5)
+                if (slow and abs(angle - angle_now) < 10):
+                    self.set_motor_dps(self.right_motor_port, speed/10)
                     slow = False
                 angle_now = self.gyro_sensor.angle
         else: 
-            self.log(f"turning right {speed}")
             self.set_motor_dps(self.right_motor_port, -speed)
             angle_now = self.gyro_sensor.angle
             while (angle_now < angle): 
-                if (slow and abs(angle_now - angle) < 15):
-                    speed /= 5
-                    self.set_motor_dps(self.right_motor_port, -speed)
+                if (slow and abs(angle_now - angle) < 10):
+                    self.set_motor_dps(self.right_motor_port, -speed/10)
                     slow = False
                 angle_now = self.gyro_sensor.angle
-                print(f"Current angle: {angle_now}, {angle}, {speed}")
+                # print(f"Current angle: {angle_now}, {angle}, {speed}")
         self.set_motor_dps(self.right_motor_port, 0)
 
-    def turn_with_gyro(self, angle, speed=500, slow=True):
+    def turn_with_gyro(self, angle, speed=450, slow=True):
         for _ in range(3):
+            slow = True
             start_angle = self.gyro_sensor.angle
             angle_now = 0
             if (start_angle > angle):
@@ -159,9 +169,9 @@ class WroRobot(BrickPi3):
                 self.set_motor_dps(self.right_motor_port, speed)
                 angle_now = self.gyro_sensor.angle
                 while (angle_now > angle):
-                    if (slow and abs(angle - angle_now) < 15):
-                        self.set_motor_dps(self.left_motor_port, -speed/5)
-                        self.set_motor_dps(self.right_motor_port, speed/5)
+                    if (slow and abs(angle - angle_now) < 10):
+                        self.set_motor_dps(self.left_motor_port, -speed/10)
+                        self.set_motor_dps(self.right_motor_port, speed/10)
                         slow = False
                     angle_now = self.gyro_sensor.angle
             else: 
@@ -170,9 +180,9 @@ class WroRobot(BrickPi3):
                 self.set_motor_dps(self.right_motor_port, -speed)
                 angle_now = self.gyro_sensor.angle
                 while (angle_now < angle): 
-                    if (slow and abs(angle_now - angle) < 15):
-                        self.set_motor_dps(self.left_motor_port, speed/5)
-                        self.set_motor_dps(self.right_motor_port, -speed/5)
+                    if (slow and abs(angle_now - angle) < 10):
+                        self.set_motor_dps(self.left_motor_port, speed/10)
+                        self.set_motor_dps(self.right_motor_port, -speed/10)
                         slow = False
                     angle_now = self.gyro_sensor.angle
             self.set_motor_dps(self.left_motor_port, 0)
@@ -181,18 +191,18 @@ class WroRobot(BrickPi3):
 
     def forward_with_gyro_to_black(self, speed, angle, sensor):
         wf = lambda robot : not sensor.is_black_reflection()
-        self.forward_with_gyro(speed, angle, wf, True)            
+        self.forward_with_gyro(-speed, angle, wf, True)            
     
     def forward_with_gyro_to_white(self, speed, angle, sensor):
         wf = lambda robot : not sensor.is_white_reflection()
-        self.forward_with_gyro(speed, angle, wf, True)            
+        self.forward_with_gyro(-speed, angle, wf, True)            
    
-    def forward_cm_with_gyro(self, distance, angle, speed=500, stop = None, is_PID = False):
-        print(speed, distance)   
+    def forward_cm_with_gyro(self, distance, angle, speed=450, stop = True, is_PID = False):
+        # print(speed, distance)
         degrees = distance * (360 / 17.6) * -1
         self.forward_angle_wit_gyro(speed, degrees, angle, stop, is_PID)
 
-    def forward_angle_wit_gyro(self, speed, degrees, angle, stop = None, is_PID = True): 
+    def forward_angle_wit_gyro(self, speed, degrees, angle, stop = True, is_PID = True): 
         self.offset_motor_encoder(self.left_motor_port, self.get_motor_encoder(self.left_motor_port))
         self.offset_motor_encoder(self.right_motor_port, self.get_motor_encoder(self.right_motor_port))
         if speed * degrees > 0:
@@ -205,23 +215,30 @@ class WroRobot(BrickPi3):
     def forward_with_gyro(self, speed, angle, while_func, stop = True, is_PID = True):
         is_PID = False
         sign = speed / abs(speed)
-        time_step=0.05
+        time_step=0.005
         left_speed = 300 * sign
         right_speed = 300 * sign
         diff_speed = 0
         while while_func(self):
             now_gyro_angle = self.gyro_sensor.angle
-            # print("left_speed: ", left_speed, ", right_speed: ", right_speed, ", speed: ", speed, ", diff_speed: ", diff_speed, ", now_gyro_angle: ", now_gyro_angle, ", forw gyro", sep="")
-
+            if left_speed > 0:
+                left_speed = min(left_speed, 720)    
+            else: 
+                left_speed = max(left_speed, -720)    
+            if right_speed > 0:
+                right_speed = min(right_speed, 720)    
+            else: 
+                right_speed = max(right_speed, -720) 
+            # self.log(f"left_speed: {left_speed}, right_speed: {right_speed}, speed: {speed}, diff_speed: {diff_speed}, now_gyro_angle:{now_gyro_angle}, forw gyro")
             self.set_motor_dps(self.left_motor_port, left_speed)
             self.set_motor_dps(self.right_motor_port, right_speed)
             diff_speed = 0
-            #print("gyro: {0}, left speed: {1}, right speed: {2}".format(self.gyro_sensor.angle, left_speed, right_speed), file=sys.stderr)
+            # print("gyro: {0}, left speed: {1}, right speed: {2}".format(self.gyro_sensor.angle, left_speed, right_speed), file=sys.stderr)
             if is_PID: 
                 my_PID = PID(25, 10, 5, angle, time_step)
                 diff_speed = my_PID.compute(now_gyro_angle)
             else:
-                diff_speed = (angle - (now_gyro_angle + self.gyro_correction)) *25
+                diff_speed = (angle - (now_gyro_angle + self.gyro_correction)) * 20
             
             if speed > 0:
                 if right_speed < speed or left_speed < speed:
@@ -274,9 +291,9 @@ class WroRobot(BrickPi3):
                         left_speed = min(left_speed, right_speed)
                         right_speed = left_speed
             time.sleep(time_step)
-        # if stop:
-        self.set_motor_dps(self.left_motor_port, 0)
-        self.set_motor_dps(self.right_motor_port, 0)
+        if stop:
+            self.set_motor_dps(self.left_motor_port, 0)
+            self.set_motor_dps(self.right_motor_port, 0)
 
     def start_log(self):
         try:
@@ -318,3 +335,11 @@ class WroRobot(BrickPi3):
         self.left_color_sensor.calibrate(self.button_pressed)
         time.sleep(1)
         self.right_color_sensor.calibrate(self.button_pressed)
+
+    def get_voltage_avg(self, n=5):
+        voltage = 0
+        for _ in range(n):
+            voltage += self.get_voltage_battery()
+            time.sleep(0.5)
+        voltage /= n
+        return voltage
